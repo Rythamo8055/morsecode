@@ -1,0 +1,222 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Morse Mentor</title>
+    <meta name="theme-color" content="var(--md-sys-color-surface-dark)">
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^18.3.1",
+    "react-dom/": "https://esm.sh/react-dom@^18.3.1/",
+    "react/": "https://esm.sh/react@^18.3.1/"
+  }
+}
+</script>
+    <style>
+      :root {
+        /* M3 Dark Theme Static Baseline Colors - Sourced from material-web.dev/theming/color */
+        --md-sys-color-primary-dark: #D0BCFF; /* Light Purple */
+        --md-sys-color-on-primary-dark: #381E72; /* Dark Purple */
+        --md-sys-color-primary-container-dark: #4F378B; /* Medium Purple */
+        --md-sys-color-on-primary-container-dark: #EADDFF; /* Light Lavender */
+        
+        --md-sys-color-secondary-dark: #CCC2DC; /* Light Gray-Purple */
+        --md-sys-color-on-secondary-dark: #332D41; /* Dark Gray-Purple */
+        --md-sys-color-secondary-container-dark: #4A4458; /* Medium Gray-Purple */
+        --md-sys-color-on-secondary-container-dark: #E8DEF8; /* Light Lavender-Gray */
+
+        --md-sys-color-tertiary-dark: #EFB8C8; /* Light Pink */
+        --md-sys-color-on-tertiary-dark: #492532; /* Dark Pink-Brown */
+        --md-sys-color-tertiary-container-dark: #633B48; /* Medium Pink-Brown */
+        --md-sys-color-on-tertiary-container-dark: #FFD8E4; /* Very Light Pink */
+
+        --md-sys-color-error-dark: #F2B8B5; /* Light Red */
+        --md-sys-color-on-error-dark: #601410; /* Dark Red */
+        --md-sys-color-error-container-dark: #8C1D18; /* Medium Red */
+        --md-sys-color-on-error-container-dark: #F9DEDC; /* Very Light Red */
+
+        --md-sys-color-background-dark: #1C1B1F; /* Very Dark Gray-Purple (Almost Black) */
+        --md-sys-color-on-background-dark: #E6E1E5; /* Light Gray */
+        
+        --md-sys-color-surface-dark: #1C1B1F; /* Same as background for a unified look */
+        --md-sys-color-on-surface-dark: #E6E1E5; /* Light Gray (Text on Surface) */
+        
+        --md-sys-color-surface-variant-dark: #49454F; /* Medium Gray-Purple (Subtle surfaces, outlines) */
+        --md-sys-color-on-surface-variant-dark: #CAC4D0; /* Light Gray (Text on Surface Variant) */
+        
+        --md-sys-color-outline-dark: #938F99; /* Medium-Light Gray (Borders) */
+        --md-sys-color-outline-variant-dark: #49454F; /* Darker Outline, same as surface-variant */
+
+        --md-sys-color-shadow-dark: #000000;
+        --md-sys-color-surface-tint-dark: var(--md-sys-color-primary-dark); /* Alias for Primary */
+        
+        --md-sys-color-inverse-primary-dark: #6750A4; /* Primary color in light theme, for inverse scenarios */
+        --md-sys-color-inverse-surface-dark: #E6E1E5; /* Light surface for inverse */
+        --md-sys-color-inverse-on-surface-dark: #313033; /* Dark text for inverse surface */
+
+        /* M3 Surface Container Colors (Dark Theme) - Tiered surfaces */
+        --md-sys-color-surface-dim-dark: #141218; /* Darkest, for scrims or very subtle backdrops */
+        
+        --md-sys-color-surface-container-lowest-dark: #100F14; /* Example: Bottom sheet drag handle area */
+        --md-sys-color-surface-container-low-dark: #1C1B1F; /* Example: Standard Cards, Dialogs (Often same as main surface) */
+        --md-sys-color-surface-container-dark: #201F23; /* Example: Slightly elevated cards, text field fill */
+        --md-sys-color-surface-container-high-dark: #2B2930; /* Example: Emphasized cards, on-hover states */
+        --md-sys-color-surface-container-highest-dark: #36343B; /* Example: Top App Bar, prominent components */
+        
+        --md-sys-color-surface-bright-dark: #3B383E; /* Brightest surface in dark theme, rarely used */
+
+         /* Text emphasis */
+        --text-emphasis-high-dark: var(--md-sys-color-on-surface-dark); 
+        --text-emphasis-medium-dark: var(--md-sys-color-on-surface-variant-dark);
+        --text-emphasis-disabled-dark: color-mix(in srgb, var(--md-sys-color-on-surface-dark) 38%, transparent);
+
+        /* State Layers - Opacity values for hover, focus, pressed, dragged */
+        --md-sys-state-hover-state-layer-opacity: 0.08;
+        --md-sys-state-focus-state-layer-opacity: 0.12;
+        --md-sys-state-pressed-state-layer-opacity: 0.12;
+        --md-sys-state-dragged-state-layer-opacity: 0.16;
+
+        /* Shape System - M3 Corner Radius Tokens */
+        --md-sys-shape-corner-none: 0px;
+        --md-sys-shape-corner-xs: 4px;
+        --md-sys-shape-corner-sm: 8px;
+        --md-sys-shape-corner-md: 12px;
+        --md-sys-shape-corner-lg: 16px;
+        --md-sys-shape-corner-xl: 28px;
+        --md-sys-shape-corner-full: 9999px; /* For pills, FABs */
+      }
+      body {
+        font-family: 'Roboto', sans-serif;
+        background-color: var(--md-sys-color-background-dark);
+        color: var(--md-sys-color-on-background-dark);
+        overscroll-behavior-y: contain;
+        margin:0; /* Reset default margin */
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      #app-loading-indicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--md-sys-color-background-dark);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: var(--md-sys-color-on-background-dark);
+        font-size: 1.125rem; /* M3 Body Large */
+        line-height: 1.75rem;
+        text-align: center;
+        padding: 20px;
+        z-index: 9999;
+      }
+      /* Custom scrollbar for a more M3 feel - WebKit browsers */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--md-sys-color-surface-container-lowest-dark);
+      }
+      ::-webkit-scrollbar-thumb {
+        background-color: var(--md-sys-color-outline-dark);
+        border-radius: var(--md-sys-shape-corner-full);
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: var(--md-sys-color-on-surface-variant-dark);
+      }
+
+      /* Basic focus visible style for accessibility, MWC like */
+      *:focus-visible {
+        outline: 2px solid var(--md-sys-color-primary-dark);
+        outline-offset: 2px;
+        border-radius: var(--md-sys-shape-corner-xs); /* Slight rounding on the outline itself */
+      }
+      /* Remove default outline for elements that will have custom focus rings (buttons, inputs) */
+      button:focus-visible, input:focus-visible, [role="button"]:focus-visible, [role="switch"]:focus-visible, [role="slider"]:focus-visible {
+        outline: none;
+      }
+
+      /* M3 Ripple Emulation Base - for buttons, list items etc. */
+      .m3-ripple {
+        position: relative;
+        overflow: hidden;
+        -webkit-tap-highlight-color: transparent; /* Disable tap highlight on touch devices */
+      }
+      .m3-ripple::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 5px;
+        height: 5px;
+        background: currentColor; /* Will be overridden by text color or specific ripple color */
+        opacity: 0;
+        border-radius: 50%;
+        transform: scale(1) translate(-50%, -50%);
+        transform-origin: center;
+      }
+      .m3-ripple:active::after { /* Or use JS for a more accurate ripple */
+        transform: scale(30) translate(-50%, -50%); /* Adjust scale based on element size */
+        opacity: var(--md-sys-state-pressed-state-layer-opacity);
+        transition: transform .3s, opacity .5s;
+      }
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-[var(--md-sys-color-background-dark)] text-[var(--md-sys-color-on-background-dark)]">
+    <div id="root">
+      <div id="app-loading-indicator">Loading Morse Mentor...</div>
+    </div>
+    <script type="module" src="/dist/main.js"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(error => {
+              console.log('ServiceWorker registration failed: ', error);
+              const loadingIndicator = document.getElementById('app-loading-indicator');
+              if (loadingIndicator) {
+                 loadingIndicator.textContent = 'Failed to load app. Please check your internet connection and try refreshing.';
+              }
+            });
+        });
+      } else {
+         const loadingIndicator = document.getElementById('app-loading-indicator');
+         if (loadingIndicator) {
+            loadingIndicator.textContent = 'Service Workers not supported. Offline features will be limited.';
+         }
+      }
+      
+      const rootEl = document.getElementById('root');
+      const observer = new MutationObserver((mutationsList, observer) => {
+          for(const mutation of mutationsList) {
+              if (mutation.type === 'childList' && rootEl.children.length > 0 && rootEl.children[0].id !== 'app-loading-indicator') { 
+                  const loadingIndicator = document.getElementById('app-loading-indicator');
+                  if (loadingIndicator) {
+                      loadingIndicator.style.display = 'none';
+                  }
+                  observer.disconnect();
+                  return;
+              }
+          }
+      });
+      if(rootEl) {
+        observer.observe(rootEl, { childList: true });
+      }
+    </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

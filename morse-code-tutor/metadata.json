@@ -1,0 +1,6 @@
+{
+  "name": "Morse Code Tutor",
+  "description": "An interactive web application to learn, practice, and master Morse code using a visual tree, quizzes, and reference lists.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

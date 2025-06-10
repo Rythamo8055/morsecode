@@ -1,0 +1,20 @@
+{
+  "name": "morse-mentor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild index.tsx --bundle --outfile=dist/main.js --loader:.tsx=tsx --jsx=automatic --format=esm --minify --external:react --external:react-dom --external:react-dom/client",
+    "dev": "esbuild index.tsx --bundle --outfile=dist/main.js --loader:.tsx=tsx --jsx=automatic --format=esm --external:react --external:react-dom --external:react-dom/client --servedir=. --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.0",
+    "esbuild": "^0.20.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.4.5",
+    "vite": "^6.3.5"
+  }
+}
