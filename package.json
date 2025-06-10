@@ -1,5 +1,6 @@
 {
   "name": "morse-mentor",
+<<<<<<< HEAD
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -16,5 +17,26 @@
     "react-dom": "^18.3.1",
     "typescript": "^5.4.5",
     "vite": "^6.3.5"
+=======
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node build.js",
+    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "esbuild": "^0.25.5",
+    "fs-extra": "^11.3.0",
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
   }
 }

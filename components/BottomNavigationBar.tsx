@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
 import React from 'react';
 import { AppView } from '../types';
 import LearnIcon from './icons/LearnIcon';
@@ -25,6 +29,7 @@ const navItems: NavItem[] = [
 
 const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ currentView, onNavigate }) => {
   return (
+<<<<<<< HEAD
     <nav 
         className="fixed bottom-4 left-4 right-4 z-30 flex justify-around h-20 bg-[var(--md-sys-color-surface-container)] text-[var(--md-sys-color-on-surface-variant)] rounded-[var(--md-sys-shape-corner-xl)] shadow-lg"
         style={{ 
@@ -32,6 +37,9 @@ const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ currentView, 
           WebkitBackdropFilter: 'blur(16px)' // Increased from 12px to 16px
         }} 
     >
+=======
+    <nav className="fixed bottom-0 left-0 right-0 z-30 flex justify-around h-20 shadow-lg bg-[var(--md-sys-color-surface-container-dark)] text-[var(--md-sys-color-on-surface-variant-dark)]">
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
       {navItems.map((item) => {
         const isActive = currentView === item.view;
         return (
@@ -40,6 +48,7 @@ const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ currentView, 
             onClick={() => onNavigate(item.view)}
             aria-current={isActive ? 'page' : undefined}
             className={`
+<<<<<<< HEAD
               m3-ripple flex flex-col items-center justify-center flex-grow p-1 pt-3 pb-2 
               transition-colors duration-200
               focus:outline-none focus-visible:bg-[color-mix(in_srgb,var(--md-sys-color-on-surface-variant),transparent_90%)]
@@ -69,6 +78,18 @@ const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ currentView, 
             }>
               {item.label}
             </span>
+=======
+              m3-ripple flex flex-col items-center justify-center flex-grow p-2
+              transition-colors duration-200
+              rounded-[var(--md-sys-shape-corner-md)] m-1
+              ${isActive ? 'bg-[var(--md-sys-color-secondary-container-dark)] text-[var(--md-sys-color-on-secondary-container-dark)]' : 'hover:bg-[var(--md-sys-color-surface-container-high-dark)]'}
+            `}
+          >
+            <div className={`w-8 h-8 mb-0.5 ${isActive ? 'text-[var(--md-sys-color-on-secondary-container-dark)]' : 'text-[var(--md-sys-color-on-surface-variant-dark)]'}`}>
+              {item.icon}
+            </div>
+            <span className={`text-xs ${isActive ? 'font-medium' : ''}`}>{item.label}</span>
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
           </button>
         );
       })}
@@ -76,4 +97,8 @@ const BottomNavigationBar: React.FC<BottomNavigationBarProps> = ({ currentView, 
   );
 };
 
+<<<<<<< HEAD
 export default BottomNavigationBar;
+=======
+export default BottomNavigationBar;
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppView, Settings, ProgressData, SnackbarMessage, QuizMode } from './types';
 import { INITIAL_SETTINGS, INITIAL_PROGRESS, DEFAULT_PLAYBACK_SPEED, PRO_MODE_PLAYBACK_SPEED } from './constants';
@@ -18,18 +22,35 @@ const App: React.FC = () => {
   const [progressData, setProgressData] = useLocalStorage<ProgressData>('morseMentorProgress', INITIAL_PROGRESS);
   const [showControls, setShowControls] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarMessage | null>(null);
+<<<<<<< HEAD
   const [isLoading, setIsLoading] = useState(true); 
 
   useEffect(() => {
+=======
+  const [isLoading, setIsLoading] = useState(true); // For initial load simulation or PWA readiness
+
+  useEffect(() => {
+    // Simulate initial loading or PWA asset readiness check
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
   
+<<<<<<< HEAD
   useEffect(() => {
     const resumeAudio = () => {
       // AudioContext resume logic is primarily handled within useMorsePlayer now.
       // This global listener can be simplified or removed if not strictly needed
       // for other audio sources.
+=======
+  // Resume AudioContext on first user interaction globally (alternative to per-hook)
+  useEffect(() => {
+    const resumeAudio = () => {
+      if (typeof window !== 'undefined' && window.AudioContext) {
+        // A common pattern is to create a dummy context and resume it
+        // This is mostly handled by useMorsePlayer now.
+      }
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
       document.body.removeEventListener('click', resumeAudio, true);
       document.body.removeEventListener('touchstart', resumeAudio, true);
     };
@@ -81,7 +102,11 @@ const App: React.FC = () => {
   
   const renderView = () => {
     if (isLoading) {
+<<<<<<< HEAD
       return <div className="flex items-center justify-center h-[calc(100vh-144px)]"><LoadingIndicator text="Loading Morse Mentor..." /></div>;
+=======
+      return <div className="flex items-center justify-center h-[calc(100vh-144px)]"><LoadingIndicator text="Loading Morse Mentor..." /></div>; // 144px = header + nav bar height
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
     }
     switch (currentView) {
       case AppView.Learn:
@@ -100,13 +125,21 @@ const App: React.FC = () => {
   const shouldShowSettingsButton = currentView === AppView.Learn || currentView === AppView.Quiz || currentView === AppView.Reference;
 
   return (
+<<<<<<< HEAD
     <div className="flex flex-col h-screen overflow-hidden bg-[var(--md-sys-color-background)]">
+=======
+    <div className="flex flex-col h-screen overflow-hidden bg-[var(--md-sys-color-background-dark)]">
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
       <Header 
         title={getHeaderTitle()} 
         showSettingsButton={shouldShowSettingsButton}
         onSettingsClick={() => setShowControls(true)}
       />
+<<<<<<< HEAD
       <main className="flex-grow overflow-y-auto pb-24"> {/* pb-24 (96px) for bottom nav: h-20 (80px) + bottom-4 (16px) */}
+=======
+      <main className="flex-grow overflow-y-auto pb-20"> {/* pb-20 for bottom nav */}
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
         {renderView()}
       </main>
       <BottomNavigationBar currentView={currentView} onNavigate={setCurrentView} />
@@ -122,4 +155,8 @@ const App: React.FC = () => {
   );
 };
 
+<<<<<<< HEAD
 export default App;
+=======
+export default App;
+>>>>>>> c6fa3e76b7f28984db453aee733759848f1bdfde
