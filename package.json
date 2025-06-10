@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "An interactive web application designed to help users learn and practice Morse code through various methods including rhythmic learning, quizzes, and a comprehensive reference guide. Users can track their progress and customize settings like sound and playback speed.",
   "scripts": {
-    "build": "mkdir -p public && cp index.html public/index.html && cp manifest.json public/manifest.json && cp -R icons public/icons && cp service-worker.js public/service-worker.js && npx esbuild index.tsx --bundle --outfile=public/index.js --format=esm --jsx=automatic --loader:.ts=tsx --external:react --external:react-dom/client --define:process.env.API_KEY=\\\"\"$API_KEY\\\"\"",
+    "build": "mkdir -p dist && cp index.html dist/index.html && cp manifest.json dist/manifest.json && cp -R icons dist/icons && cp service-worker.js dist/service-worker.js && npx esbuild index.tsx --bundle --outfile=dist/index.js --format=esm --jsx=automatic --loader:.ts=tsx --external:react --external:react-dom/client --define:process.env.API_KEY=\""$API_KEY\"",
     "start": "npx esbuild index.tsx --bundle --outfile=public/index.js --format=esm --jsx=automatic --loader:.ts=tsx --external:react --external:react-dom/client --servedir=public --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
