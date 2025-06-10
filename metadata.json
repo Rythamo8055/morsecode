@@ -1,0 +1,5 @@
+{
+  "name": "Morse Mentor",
+  "description": "An interactive web application designed to help users learn and practice Morse code through various methods including rhythmic learning, quizzes, and a comprehensive reference guide. Users can track their progress and customize settings like sound and playback speed.",
+  "requestFramePermissions": []
+}

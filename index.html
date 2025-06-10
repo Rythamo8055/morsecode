@@ -1,0 +1,130 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Morse Mentor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1E1E1E">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background-color: var(--md-sys-color-background-dark, #121212);
+      color: var(--md-sys-color-on-background-dark, #FFFFFF);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    /* Material Design 3 Dark Theme Color Palette (Approximate) */
+    :root {
+      --md-sys-color-primary-dark: #A0CAFF;
+      --md-sys-color-on-primary-dark: #003258;
+      --md-sys-color-primary-container-dark: #00497D;
+      --md-sys-color-on-primary-container-dark: #D2E4FF;
+      --md-sys-color-secondary-dark: #B8C8DC;
+      --md-sys-color-on-secondary-dark: #283141;
+      --md-sys-color-secondary-container-dark: #3E4758;
+      --md-sys-color-on-secondary-container-dark: #D4E3F8;
+      --md-sys-color-tertiary-dark: #D8BDE2;
+      --md-sys-color-on-tertiary-dark: #3C2B47;
+      --md-sys-color-tertiary-container-dark: #53425F;
+      --md-sys-color-on-tertiary-container-dark: #F4D9FE;
+      --md-sys-color-error-dark: #FFB4AB;
+      --md-sys-color-on-error-dark: #690005;
+      --md-sys-color-error-container-dark: #93000A;
+      --md-sys-color-on-error-container-dark: #FFDAD6;
+      --md-sys-color-background-dark: #1A1C1E; /* Main background */
+      --md-sys-color-on-background-dark: #E2E2E6; /* Text on main background */
+      --md-sys-color-surface-dark: #1A1C1E; /* Cards, sheets, menus */
+      --md-sys-color-on-surface-dark: #E2E2E6; /* Text on surface */
+      --md-sys-color-surface-variant-dark: #42474E; /* Dividers, subdued elements */
+      --md-sys-color-on-surface-variant-dark: #C2C7CF; /* Text on surface variant */
+      --md-sys-color-outline-dark: #8C9199; /* Borders, outlines */
+      --md-sys-color-shadow-dark: #000000;
+      --md-sys-color-inverse-surface-dark: #E2E2E6;
+      --md-sys-color-inverse-on-surface-dark: #2F3033;
+      --md-sys-color-inverse-primary-dark: #0060A9;
+      --md-sys-color-surface-dim-dark: #121415;
+      --md-sys-color-surface-bright-dark: #383A3C;
+      --md-sys-color-surface-container-lowest-dark: #0C0E0F;
+      --md-sys-color-surface-container-low-dark: #1A1C1E;
+      --md-sys-color-surface-container-dark: #1E2022; /* Component backgrounds like text fields, cards slightly elevated */
+      --md-sys-color-surface-container-high-dark: #282A2D; /* More prominent component backgrounds */
+      --md-sys-color-surface-container-highest-dark: #333538; /* Most prominent component backgrounds */
+
+      /* Shapes */
+      --md-sys-shape-corner-none: 0px;
+      --md-sys-shape-corner-xs: 4px;
+      --md-sys-shape-corner-sm: 8px;
+      --md-sys-shape-corner-md: 12px;
+      --md-sys-shape-corner-lg: 16px;
+      --md-sys-shape-corner-xl: 28px;
+      --md-sys-shape-corner-full: 9999px; /* For pills, FABs */
+    }
+
+    /* Basic ripple effect (m3-ripple class can be added to elements) */
+    .m3-ripple {
+      position: relative;
+      overflow: hidden;
+    }
+    .m3-ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.3); /* Ripple color */
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1) translate(-50%,-50%);
+      transform-origin: 50% 50%;
+    }
+    .m3-ripple:active::after {
+      animation: ripple 0.5s ease-out;
+    }
+    @keyframes ripple {
+      0% {
+        transform: scale(0) translate(-50%,-50%);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(20) translate(-50%,-50%); /* Adjust scale for ripple size */
+        opacity: 0;
+      }
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <script type="module" src="/main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(error => {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      });
+    }
+  </script>
+</body>
+</html>
