@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Morse Mentor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1A1C1E">
+  <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      background-color: var(--md-sys-color-background); /* Use theme variable */
+      color: var(--md-sys-color-on-background); /* Use theme variable */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    /* Material Design 3 Dark Theme Color Palette - Aero (Vista-like) Variant */
+    :root {
+      /* Aero Base Colors */
+      --aero-base-hue: 220;
+      --aero-base-saturation: 10%;
+      --aero-base-lightness-bg: 10%; /* For the main opaque background: hsl(220, 10%, 10%) -> #17191C */
+      --aero-base-lightness-surface: 12%; /* Slightly lighter for translucent surfaces */
+
+      /* Bolder Primary Family (Opaque for accents) */
+      --md-sys-color-primary: #9ACBFF; 
+      --md-sys-color-on-primary: #00315B; 
+      --md-sys-color-primary-container: hsla(207, 100%, 25%, 0.7); /* #004882 original, now translucent */
+      --md-sys-color-on-primary-container: #CFE5FF; 
+
+      /* Bolder Secondary Family (Opaque for accents) */
+      --md-sys-color-secondary: #85D3E0; 
+      --md-sys-color-on-secondary: #00363E; 
+      --md-sys-color-secondary-container: hsla(189, 100%, 17%, 0.7); /* #004F58 original, now translucent */
+      --md-sys-color-on-secondary-container: #B8F1FF; 
+
+      /* Bolder Tertiary Family (Opaque for accents) */
+      --md-sys-color-tertiary: #F2B8EC; 
+      --md-sys-color-on-tertiary: #522A51; 
+      --md-sys-color-tertiary-container: hsla(304, 24%, 33%, 0.7); /* #6C406A original, now translucent */
+      --md-sys-color-on-tertiary-container: #FFD8F5; 
+      
+      /* Error Family (Accents Opaque, Container Translucent) */
+      --md-sys-color-error: #FFB4A9; 
+      --md-sys-color-on-error: #680003; 
+      --md-sys-color-error-container: hsla(356, 100%, 29%, 0.7); /* #930006 original, now translucent */
+      --md-sys-color-on-error-container: #FFDAD4; 
+      
+      /* Neutral Opaque Background */
+      --md-sys-color-background: hsl(var(--aero-base-hue), var(--aero-base-saturation), var(--aero-base-lightness-bg));
+      --md-sys-color-on-background: #E2E2E6; /* Kept opaque for readability */
+
+      /* Translucent Aero Surfaces */
+      --md-sys-color-surface: hsla(var(--aero-base-hue), var(--aero-base-saturation), var(--aero-base-lightness-surface), 0.65);
+      --md-sys-color-on-surface: #E2E2E6; /* Kept opaque */
+      --md-sys-color-surface-variant: hsla(var(--aero-base-hue), 8%, 30%, 0.7); /* Original: #42474E */
+      --md-sys-color-on-surface-variant: #C2C7CF; /* Kept opaque */
+      
+      --md-sys-color-outline: hsla(var(--aero-base-hue), 7%, 55%, 0.5); /* Original: #8C9199, softer translucent outline */
+      --md-sys-color-outline-variant: hsla(var(--aero-base-hue), 8%, 30%, 0.6); /* Original: #42474E, softer translucent outline variant */
+      --md-sys-color-shadow: #000000;
+      --md-sys-color-scrim: #000000; 
+      
+      /* Inverse colors (kept standard, typically light on dark theme) */
+      --md-sys-color-inverse-surface: #E2E2E6;
+      --md-sys-color-inverse-on-surface: #2F3033;
+      --md-sys-color-inverse-primary: #0061A4;
+
+      /* Surface Tones (Darker, more opaque ones for specific uses if needed, or keep translucent) */
+      --md-sys-color-surface-dim: hsla(var(--aero-base-hue), var(--aero-base-saturation), calc(var(--aero-base-lightness-surface) - 4%), 0.6); 
+      --md-sys-color-surface-bright: hsla(var(--aero-base-hue), var(--aero-base-saturation), calc(var(--aero-base-lightness-surface) + 10%), 0.75);
+      
+      /* Translucent Aero Surface Container Tones */
+      --md-sys-color-surface-container-lowest: hsla(var(--aero-base-hue), var(--aero-base-saturation), calc(var(--aero-base-lightness-surface) - 2%), 0.55);
+      --md-sys-color-surface-container-low: hsla(var(--aero-base-hue), var(--aero-base-saturation), var(--aero-base-lightness-surface), 0.6); 
+      --md-sys-color-surface-container: hsla(var(--aero-base-hue), var(--aero-base-saturation), calc(var(--aero-base-lightness-surface) + 2%), 0.60); /* Alpha changed from 0.7 to 0.60 */
+      --md-sys-color-surface-container-high: hsla(var(--aero-base-hue), var(--aero-base-saturation), calc(var(--aero-base-lightness-surface) + 4%), 0.75);
+      --md-sys-color-surface-container-highest: hsla(var(--aero-base-hue), var(--aero-base-saturation), calc(var(--aero-base-lightness-surface) + 6%), 0.8);
+
+      /* Surface Tint - uses primary which is opaque, this is fine for state layers etc. */
+      --md-sys-color-surface-tint: var(--md-sys-color-primary);
+
+      /* Shapes (More Rounded for Aero) */
+      --md-sys-shape-corner-none: 0px;
+      --md-sys-shape-corner-xs: 8px;  /* was 4px */
+      --md-sys-shape-corner-sm: 12px; /* was 8px */
+      --md-sys-shape-corner-md: 18px; /* was 12px */
+      --md-sys-shape-corner-lg: 28px; /* was 16px, M3 Dialog uses 28dp */
+      --md-sys-shape-corner-xl: 36px; /* was 28px */
+      --md-sys-shape-corner-full: 9999px; 
+    }
+
+    .m3-ripple {
+      position: relative;
+      overflow: hidden;
+    }
+    .m3-ripple::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background-color: var(--md-sys-color-on-surface); 
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1) translate(-50%,-50%);
+      transform-origin: 50% 50%;
+    }
+    .m3-ripple:active::after {
+      animation: ripple 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); 
+    }
+    @keyframes ripple {
+      0% {
+        transform: scale(0) translate(-50%,-50%);
+        opacity: 0.15; 
+      }
+      100% {
+        transform: scale(20) translate(-50%,-50%); 
+        opacity: 0;
+      }
+    }
+  </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react": "https://esm.sh/react@^19.1.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+  <noscript>You need to enable JavaScript to run this app.</noscript>
+  <div id="root"></div>
+  <script type="module" src="/index.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          })
+          .catch(error => {
+            console.log('ServiceWorker registration failed: ', error);
+          });
+      });
+    }
+  </script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
