@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { AppView, Settings, ProgressData, SnackbarMessage, QuizMode } from './types';
 import { INITIAL_SETTINGS, INITIAL_PROGRESS, DEFAULT_PLAYBACK_SPEED, PRO_MODE_PLAYBACK_SPEED } from './constants';
@@ -80,8 +81,16 @@ const App: React.FC = () => {
   };
   
   const renderView = () => {
+    // Calculate available height for views like ReferenceList
+    // Header (h-16 = 64px), BottomNav (h-20 = 80px + bottom-4 = 16px -> 96px total from bottom of viewport)
+    // Total static vertical space = 64px (header) + 96px (bottom nav area) = 160px
+    // The main content area has pb-24 (96px).
+    // The actual scrollable content height is 100vh - header height.
+    // The padding-bottom on main is to prevent overlap with the fixed BottomNav.
+
     if (isLoading) {
-      return <div className="flex items-center justify-center h-[calc(100vh-144px)]"><LoadingIndicator text="Loading Morse Mentor..." /></div>;
+      // Use min-h-full or similar to ensure it takes up space correctly if needed
+      return <div className="flex items-center justify-center flex-grow"><LoadingIndicator text="Loading Morse Mentor..." /></div>;
     }
     switch (currentView) {
       case AppView.Learn:
@@ -89,6 +98,7 @@ const App: React.FC = () => {
       case AppView.Quiz:
         return <Quiz progressData={progressData} onUpdateProgress={handleUpdateProgress} settings={settings} onShowSnackbar={showSnackbar} />;
       case AppView.Reference:
+        // ReferenceList is now designed to be flex-col h-full of its parent
         return <ReferenceList dotDuration={effectivePlaybackSpeed} soundEnabled={settings.soundEnabled} />;
       case AppView.Progress:
         return <ProgressDisplay progressData={progressData} />;
@@ -106,7 +116,15 @@ const App: React.FC = () => {
         showSettingsButton={shouldShowSettingsButton}
         onSettingsClick={() => setShowControls(true)}
       />
-      <main className="flex-grow overflow-y-auto pb-24"> {/* pb-24 (96px) for bottom nav: h-20 (80px) + bottom-4 (16px) */}
+      {/* 
+        Main content area:
+        - flex-grow: takes available vertical space
+        - overflow-y-auto: enables scrolling for content that overflows this area
+        - pb-24: padding at the bottom to ensure content doesn't hide behind the BottomNavigationBar (80px height + 16px bottom offset)
+        - For views like ReferenceList that manage their own internal scrolling (flex-col h-full), this setup works.
+          The h-full in ReferenceList refers to the height of this main element.
+      */}
+      <main className="flex-grow overflow-y-auto pb-24 flex flex-col"> 
         {renderView()}
       </main>
       <BottomNavigationBar currentView={currentView} onNavigate={setCurrentView} />

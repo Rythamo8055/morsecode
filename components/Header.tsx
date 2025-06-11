@@ -1,3 +1,4 @@
+
 import React from 'react';
 import IconButton from './IconButton';
 import SettingsIcon from './icons/SettingsIcon';
@@ -11,9 +12,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title, showSettingsButton, onSettingsClick }) => {
   return (
     <header 
-      className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)]"
+      className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 bg-[var(--md-sys-color-surface)] text-[var(--md-sys-color-on-surface)] shadow-md" // Updated shadow
       style={{ 
-        boxShadow: '0px 1px 2px 0px rgba(0,0,0,0.15), 0px 1px 1px 0px rgba(0,0,0,0.10), 0px 1px 0px -1px rgba(0,0,0,0.08)', // Softer shadow for blurred bg
+        // Using Tailwind's shadow-md: box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)' // For Safari
       }} 

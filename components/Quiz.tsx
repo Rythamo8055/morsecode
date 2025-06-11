@@ -154,6 +154,54 @@ const Quiz: React.FC<QuizProps> = ({ progressData, onUpdateProgress, settings, o
     return <div className="p-4 text-center text-[var(--md-sys-color-on-surface-variant)]">Loading question...</div>;
   }
 
+  const renderMCQOptions = () => {
+    if (!currentQuestion || !currentQuestion.options) return null;
+
+    const optionRows: string[][] = [];
+    for (let i = 0; i < currentQuestion.options.length; i += 2) {
+        optionRows.push(currentQuestion.options.slice(i, i + 2));
+    }
+
+    return (
+        <div className="space-y-2 mt-4">
+            {optionRows.map((row, rowIndex) => (
+                <div className="flex" key={rowIndex}>
+                    {row.map((opt, optIndex) => {
+                        let shapeClass = 'flex-1 !px-4'; // Base for grouped button
+                        if (row.length > 1) {
+                            if (optIndex === 0) { // First button in row
+                                shapeClass += ' !rounded-r-none';
+                            } else if (optIndex === row.length - 1) { // Last button in row
+                                shapeClass += ' !rounded-l-none';
+                            } else { // Middle button in row
+                                shapeClass += ' !rounded-none';
+                            }
+                        }
+                        // Default full rounding is applied by Button if not overridden
+
+                        return (
+                            <Button
+                                key={opt}
+                                variant="tonal"
+                                onClick={() => handleSubmit(opt)}
+                                disabled={isSubmitting}
+                                className={`
+                                    !text-lg 
+                                    ${currentQuestion.mode === QuizMode.LetterToMorse ? '!font-mono !tracking-widest' : '!text-2xl'}
+                                    ${shapeClass}
+                                `}
+                            >
+                                {opt}
+                            </Button>
+                        );
+                    })}
+                </div>
+            ))}
+        </div>
+    );
+  };
+
+
   const renderInput = () => {
     switch (currentQuestion.mode) {
       case QuizMode.LetterToMorse:
@@ -161,15 +209,7 @@ const Quiz: React.FC<QuizProps> = ({ progressData, onUpdateProgress, settings, o
           <>
             <p className="text-lg text-[var(--md-sys-color-on-surface-variant)] mb-2">Enter Morse for:</p>
             <p className="text-6xl font-bold text-[var(--md-sys-color-primary)] mb-6">{currentQuestion.character}</p>
-            {currentQuestion.options ? (
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                    {currentQuestion.options.map(opt => (
-                        <Button key={opt} variant="tonal" onClick={() => handleSubmit(opt)} disabled={isSubmitting} className="!text-lg !font-mono !tracking-widest">
-                            {opt}
-                        </Button>
-                    ))}
-                </div>
-            ) : (
+            {currentQuestion.options ? renderMCQOptions() : (
                  <TextField
                     id="letterToMorseInput"
                     label="Type Morse code (e.g., .-)"
@@ -192,15 +232,7 @@ const Quiz: React.FC<QuizProps> = ({ progressData, onUpdateProgress, settings, o
                     <PlayArrowIcon />
                 </IconButton>
             </div>
-             {currentQuestion.options ? (
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                    {currentQuestion.options.map(opt => (
-                        <Button key={opt} variant="tonal" onClick={() => handleSubmit(opt)} disabled={isSubmitting} className="!text-2xl">
-                            {opt}
-                        </Button>
-                    ))}
-                </div>
-            ) : (
+             {currentQuestion.options ? renderMCQOptions() : (
                 <TextField
                   id="morseToLetterInput"
                   label="Type character"
@@ -225,13 +257,13 @@ const Quiz: React.FC<QuizProps> = ({ progressData, onUpdateProgress, settings, o
             >
               {typedMorse || <span className="opacity-50">Your input</span>}
             </div>
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <Button onClick={() => handleTypeItOutInput('.')} leadingIcon={<DotIcon />} disabled={isSubmitting} variant="tonal" className="!h-14">Dit</Button>
-              <Button onClick={() => handleTypeItOutInput('-')} leadingIcon={<DashIcon />} disabled={isSubmitting} variant="tonal" className="!h-14">Dah</Button>
+            <div className="flex mb-4">
+              <Button onClick={() => handleTypeItOutInput('.')} leadingIcon={<DotIcon />} disabled={isSubmitting} variant="tonal" className="!h-14 flex-1 !rounded-r-none !px-4">Dit</Button>
+              <Button onClick={() => handleTypeItOutInput('-')} leadingIcon={<DashIcon />} disabled={isSubmitting} variant="tonal" className="!h-14 flex-1 !rounded-l-none !px-4">Dah</Button>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-                <Button onClick={() => setTypedMorse('')} variant="outlined" disabled={isSubmitting || typedMorse.length === 0}>Clear</Button>
-                <Button onClick={() => handleSubmit()} disabled={isSubmitting || typedMorse.length === 0}>Submit</Button>
+            <div className="flex">
+                <Button onClick={() => setTypedMorse('')} variant="outlined" disabled={isSubmitting || typedMorse.length === 0} className="flex-1 !rounded-r-none !px-4">Clear</Button>
+                <Button onClick={() => handleSubmit()} disabled={isSubmitting || typedMorse.length === 0} className="flex-1 !rounded-l-none -ml-px !px-4">Submit</Button>
             </div>
           </>
         );
