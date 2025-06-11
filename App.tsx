@@ -1,7 +1,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { AppView, Settings, ProgressData, SnackbarMessage, QuizMode } from './types';
-import { INITIAL_SETTINGS, INITIAL_PROGRESS, DEFAULT_PLAYBACK_SPEED, PRO_MODE_PLAYBACK_SPEED } from './constants';
+import { AppView, Settings, ProgressData, SnackbarMessage, UserStats, BadgeDefinition, QuizSessionStats, BadgeId } from './types';
+import { 
+  INITIAL_SETTINGS, INITIAL_PROGRESS, DEFAULT_PLAYBACK_SPEED, PRO_MODE_PLAYBACK_SPEED, 
+  INITIAL_USER_STATS, XP_PER_CORRECT_ANSWER, XP_STREAK_BONUS_MULTIPLIER, 
+  getXPForNextLevel, BADGE_DEFINITIONS, XP_DAILY_BONUS, LEVEL_UP_SOUND_MORSE, BADGE_UNLOCK_SOUND_MORSE
+} from './constants';
 import useLocalStorage from './hooks/useLocalStorage';
 import Header from './components/Header';
 import BottomNavigationBar from './components/BottomNavigationBar';
@@ -12,102 +16,233 @@ import ProgressDisplay from './components/ProgressDisplay';
 import Controls from './components/Controls';
 import Snackbar from './components/Snackbar';
 import LoadingIndicator from './components/LoadingIndicator';
+import useMorsePlayer from './hooks/useMorsePlayer'; // For sound feedback
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<AppView>(AppView.Learn);
   const [settings, setSettings] = useLocalStorage<Settings>('morseMentorSettings', INITIAL_SETTINGS);
   const [progressData, setProgressData] = useLocalStorage<ProgressData>('morseMentorProgress', INITIAL_PROGRESS);
+  const [userStats, setUserStats] = useLocalStorage<UserStats>('morseMentorUserStats', INITIAL_USER_STATS);
   const [showControls, setShowControls] = useState(false);
   const [snackbar, setSnackbar] = useState<SnackbarMessage | null>(null);
   const [isLoading, setIsLoading] = useState(true); 
+
+  const effectivePlaybackSpeed = settings.isProMode ? PRO_MODE_PLAYBACK_SPEED : settings.playbackSpeed;
+  const { playMorse: playSoundFeedback } = useMorsePlayer(effectivePlaybackSpeed, settings.soundEnabled);
+
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, []);
   
-  useEffect(() => {
-    const resumeAudio = () => {
-      // AudioContext resume logic is primarily handled within useMorsePlayer now.
-      // This global listener can be simplified or removed if not strictly needed
-      // for other audio sources.
-      document.body.removeEventListener('click', resumeAudio, true);
-      document.body.removeEventListener('touchstart', resumeAudio, true);
-    };
-    document.body.addEventListener('click', resumeAudio, true);
-    document.body.addEventListener('touchstart', resumeAudio, true);
-    return () => {
-      document.body.removeEventListener('click', resumeAudio, true);
-      document.body.removeEventListener('touchstart', resumeAudio, true);
-    };
+  const showSnackbar = useCallback((message: string, type: SnackbarMessage['type']) => {
+    setSnackbar({ id: Date.now(), message, type });
   }, []);
+
+  // Check for daily bonus on app load or view change if relevant
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (userStats.lastActivityDate !== today && userStats.dailyBonusClaimedDate !== today) {
+      // Logic to prompt for daily bonus could be here, or implicitly handled on first action
+    }
+    // Update last activity date
+    if (userStats.lastActivityDate !== today) {
+      setUserStats(prev => ({ ...prev, lastActivityDate: today }));
+    }
+  }, [userStats.lastActivityDate, userStats.dailyBonusClaimedDate, setUserStats]);
+
+
+  const claimDailyBonus = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (userStats.dailyBonusClaimedDate !== today) {
+      setUserStats(prev => {
+        const newTotalXP = prev.totalXP + XP_DAILY_BONUS;
+        const newStats: UserStats = {
+          ...prev,
+          totalXP: newTotalXP,
+          dailyBonusClaimedDate: today,
+          dailyBonusClaimsCount: prev.dailyBonusClaimsCount + 1,
+        };
+        // Check for level up after bonus
+        let newLevel = prev.level;
+        let xpForNext = getXPForNextLevel(newLevel); 
+        
+        let totalXpToReachCurrentLevel = 0;
+        for (let i = 1; i < prev.level; i++) {
+            totalXpToReachCurrentLevel += getXPForNextLevel(i);
+        }
+         if (prev.level === 1) totalXpToReachCurrentLevel = 0;
+
+
+        let currentXPInLevelAfterBonus = newTotalXP - totalXpToReachCurrentLevel;
+        
+        while (currentXPInLevelAfterBonus >= xpForNext && xpForNext > 0) { // Add xpForNext > 0 to prevent infinite loop if getXPForNextLevel returns 0
+          currentXPInLevelAfterBonus -= xpForNext; 
+          newLevel++;
+          xpForNext = getXPForNextLevel(newLevel); 
+        }
+
+        if (newLevel > prev.level) {
+          showSnackbar(`Level Up! Reached Level ${newLevel}!`, 'success');
+          if (settings.soundEnabled) playSoundFeedback(LEVEL_UP_SOUND_MORSE);
+        }
+        newStats.level = newLevel;
+        return newStats;
+      });
+      showSnackbar(`Daily Bonus! +${XP_DAILY_BONUS} XP claimed!`, 'success');
+    }
+  }, [userStats, setUserStats, showSnackbar, settings.soundEnabled, playSoundFeedback]);
+
+
+  const checkAndAwardBadges = useCallback((quizSessionStats?: QuizSessionStats) => {
+    setUserStats(prevStats => {
+      const newlyEarnedBadges: BadgeId[] = BADGE_DEFINITIONS.filter(badgeDef => {
+        if (prevStats.earnedBadges.includes(badgeDef.id)) {
+          return false; 
+        }
+        return badgeDef.condition(progressData, prevStats, quizSessionStats);
+      }).map(b => b.id);
+
+      if (newlyEarnedBadges.length > 0) {
+        newlyEarnedBadges.forEach(badgeId => {
+            const badgeInfo = BADGE_DEFINITIONS.find(b => b.id === badgeId);
+            if (badgeInfo) {
+              showSnackbar(`Achievement Unlocked: ${badgeInfo.name}!`, 'success');
+              if(settings.soundEnabled) playSoundFeedback(BADGE_UNLOCK_SOUND_MORSE);
+            }
+        });
+        return {
+          ...prevStats,
+          earnedBadges: [...prevStats.earnedBadges, ...newlyEarnedBadges],
+        };
+      }
+      return prevStats; 
+    });
+  }, [setUserStats, progressData, showSnackbar, settings.soundEnabled, playSoundFeedback]); 
+
+  useEffect(() => {
+    checkAndAwardBadges();
+  }, [progressData, userStats.level, userStats.longestQuizStreak, userStats.dailyBonusClaimsCount, userStats.completedQuizSessions, checkAndAwardBadges]);
 
 
   const handleSettingsChange = (newSettings: Partial<Settings>) => {
     setSettings(prev => ({ ...prev, ...newSettings }));
   };
-
-  const handleUpdateProgress = useCallback((char: string, isCorrect: boolean) => {
-    setProgressData(prev => {
-      const current = prev[char] || { attempts: 0, correct: 0 };
+  
+  const handleQuizQuestionAnswered = useCallback((char: string, isCorrect: boolean, currentSessionStreak: number, quizSessionStats: QuizSessionStats) => {
+    setProgressData(prevProgress => {
+      const current = prevProgress[char] || { attempts: 0, correct: 0, score: 0 };
       return {
-        ...prev,
+        ...prevProgress,
         [char]: {
           attempts: current.attempts + 1,
           correct: current.correct + (isCorrect ? 1 : 0),
+          score: (current.score || 0) + (isCorrect ? XP_PER_CORRECT_ANSWER : 0),
         },
       };
     });
-  }, [setProgressData]);
 
-  const showSnackbar = (message: string, type: SnackbarMessage['type']) => {
-    setSnackbar({ id: Date.now(), message, type });
-  };
+    if (isCorrect) {
+      setUserStats(prevStats => {
+        let newXP = prevStats.totalXP + XP_PER_CORRECT_ANSWER;
+        newXP += currentSessionStreak * XP_STREAK_BONUS_MULTIPLIER;
 
-  const dismissSnackbar = () => {
-    setSnackbar(null);
-  };
+        let updatedLevel = prevStats.level;
+        let totalXpToReachCurrentLevelStart = 0; 
+        for (let i = 1; i < updatedLevel; i++) { 
+            totalXpToReachCurrentLevelStart += getXPForNextLevel(i);
+        }
+         if (updatedLevel === 1) totalXpToReachCurrentLevelStart = 0;
 
-  const effectivePlaybackSpeed = settings.isProMode ? PRO_MODE_PLAYBACK_SPEED : settings.playbackSpeed;
+
+        let xpIntoCurrentLevel = newXP - totalXpToReachCurrentLevelStart;
+        let xpNeededForThisLevelUp = getXPForNextLevel(updatedLevel);
+
+        while (xpIntoCurrentLevel >= xpNeededForThisLevelUp && xpNeededForThisLevelUp > 0) {
+            xpIntoCurrentLevel -= xpNeededForThisLevelUp; 
+            updatedLevel++;
+            xpNeededForThisLevelUp = getXPForNextLevel(updatedLevel); 
+            showSnackbar(`Level Up! Reached Level ${updatedLevel}!`, 'success');
+            if(settings.soundEnabled) playSoundFeedback(LEVEL_UP_SOUND_MORSE);
+        }
+
+        const newLongestStreak = Math.max(prevStats.longestQuizStreak, currentSessionStreak);
+
+        return {
+          ...prevStats,
+          totalXP: newXP,
+          level: updatedLevel,
+          currentQuizStreak: currentSessionStreak, 
+          longestQuizStreak: newLongestStreak,
+        };
+      });
+    }
+  }, [setProgressData, setUserStats, showSnackbar, settings.soundEnabled, playSoundFeedback]);
+
+  const handleQuizSessionComplete = useCallback((quizSessionStats: QuizSessionStats) => {
+    setUserStats(prev => ({
+        ...prev,
+        completedQuizSessions: prev.completedQuizSessions + 1,
+    }));
+    checkAndAwardBadges(quizSessionStats);
+  }, [setUserStats, checkAndAwardBadges]);
+
 
   const getHeaderTitle = () => {
     switch (currentView) {
       case AppView.Learn: return 'Learn Morse';
       case AppView.Quiz: return 'Practice Quiz';
       case AppView.Reference: return 'Morse Reference';
-      case AppView.Progress: return 'Your Progress';
+      case AppView.Progress: return 'Your Profile';
       default: return 'Morse Mentor';
     }
   };
   
-  const renderView = () => {
-    // Calculate available height for views like ReferenceList
-    // Header (h-16 = 64px), BottomNav (h-20 = 80px + bottom-4 = 16px -> 96px total from bottom of viewport)
-    // Total static vertical space = 64px (header) + 96px (bottom nav area) = 160px
-    // The main content area has pb-24 (96px).
-    // The actual scrollable content height is 100vh - header height.
-    // The padding-bottom on main is to prevent overlap with the fixed BottomNav.
+  const handleViewInteraction = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0];
+    if (userStats.lastActivityDate !== today) {
+      setUserStats(prev => ({ ...prev, lastActivityDate: today }));
+      if (userStats.dailyBonusClaimedDate !== today) {
+          if (currentView === AppView.Learn || currentView === AppView.Quiz || currentView === AppView.Progress) { 
+             claimDailyBonus();
+          }
+      }
+    }
+  }, [userStats.lastActivityDate, userStats.dailyBonusClaimedDate, setUserStats, claimDailyBonus, currentView]);
 
+  useEffect(() => {
+    handleViewInteraction();
+  }, [currentView, handleViewInteraction]);
+
+
+  const renderView = () => {
     if (isLoading) {
-      // Use min-h-full or similar to ensure it takes up space correctly if needed
       return <div className="flex items-center justify-center flex-grow"><LoadingIndicator text="Loading Morse Mentor..." /></div>;
     }
     switch (currentView) {
       case AppView.Learn:
         return <RhythmMethodDisplay dotDuration={effectivePlaybackSpeed} soundEnabled={settings.soundEnabled} onShowSnackbar={showSnackbar} />;
       case AppView.Quiz:
-        return <Quiz progressData={progressData} onUpdateProgress={handleUpdateProgress} settings={settings} onShowSnackbar={showSnackbar} />;
+        return <Quiz 
+                  progressData={progressData} 
+                  onQuestionAnswered={handleQuizQuestionAnswered}
+                  onSessionComplete={handleQuizSessionComplete}
+                  settings={settings} 
+                  onShowSnackbar={showSnackbar} 
+                  userStats={userStats}
+                  playUiSound={playSoundFeedback} // Pass the sound player for UI feedback
+                />;
       case AppView.Reference:
-        // ReferenceList is now designed to be flex-col h-full of its parent
         return <ReferenceList dotDuration={effectivePlaybackSpeed} soundEnabled={settings.soundEnabled} />;
       case AppView.Progress:
-        return <ProgressDisplay progressData={progressData} />;
+        return <ProgressDisplay progressData={progressData} userStats={userStats} onClaimDailyBonus={claimDailyBonus} />;
       default:
         return null;
     }
   };
   
-  const shouldShowSettingsButton = currentView === AppView.Learn || currentView === AppView.Quiz || currentView === AppView.Reference;
+  const shouldShowSettingsButton = currentView === AppView.Learn || currentView === AppView.Quiz || currentView === AppView.Reference || currentView === AppView.Progress;
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[var(--md-sys-color-background)]">
@@ -116,14 +251,6 @@ const App: React.FC = () => {
         showSettingsButton={shouldShowSettingsButton}
         onSettingsClick={() => setShowControls(true)}
       />
-      {/* 
-        Main content area:
-        - flex-grow: takes available vertical space
-        - overflow-y-auto: enables scrolling for content that overflows this area
-        - pb-24: padding at the bottom to ensure content doesn't hide behind the BottomNavigationBar (80px height + 16px bottom offset)
-        - For views like ReferenceList that manage their own internal scrolling (flex-col h-full), this setup works.
-          The h-full in ReferenceList refers to the height of this main element.
-      */}
       <main className="flex-grow overflow-y-auto pb-24 flex flex-col"> 
         {renderView()}
       </main>
@@ -135,7 +262,7 @@ const App: React.FC = () => {
           onClose={() => setShowControls(false)}
         />
       )}
-      <Snackbar message={snackbar} onDismiss={dismissSnackbar} />
+      <Snackbar message={snackbar} onDismiss={() => setSnackbar(null)} />
     </div>
   );
 };

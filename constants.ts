@@ -1,5 +1,8 @@
 
-import { MorseCodeMap, CharacterSet, CharacterProgress, Settings } from './types';
+import { MorseCodeMap, CharacterSet, CharacterProgress, Settings, UserStats, BadgeDefinition, ProgressData, QuizSessionStats } from './types';
+import AwardIcon from './components/icons/AwardIcon'; // Placeholder, will create this
+import StarIcon from './components/icons/StarIcon';   // Placeholder
+import FlameIcon from './components/icons/FlameIcon'; // Placeholder
 
 export const MORSE_CODE_MAP: MorseCodeMap[] = [
   // Letters
@@ -70,7 +73,7 @@ export const CHARACTER_SETS: CharacterSet[] = [
 export const ALL_CHARACTERS: string[] = MORSE_CODE_MAP.map(item => item.char);
 
 export const INITIAL_PROGRESS: { [key: string]: CharacterProgress } = ALL_CHARACTERS.reduce((acc, char) => {
-  acc[char] = { attempts: 0, correct: 0 };
+  acc[char] = { attempts: 0, correct: 0, score: 0 };
   return acc;
 }, {} as { [key: string]: CharacterProgress });
 
@@ -88,3 +91,121 @@ export const PRO_MODE_PLAYBACK_SPEED = 60; // ms for a dot (faster)
 
 export const QUIZ_OPTIONS_COUNT = 4;
 export const MAX_QUIZ_QUESTIONS = 10;
+
+// Gamification Constants
+export const INITIAL_USER_STATS: UserStats = {
+  totalXP: 0,
+  level: 1,
+  currentQuizStreak: 0,
+  longestQuizStreak: 0,
+  lastActivityDate: null,
+  dailyBonusClaimedDate: null,
+  dailyBonusClaimsCount: 0,
+  earnedBadges: [],
+  completedQuizSessions: 0,
+};
+
+export const XP_PER_CORRECT_ANSWER = 10;
+export const XP_STREAK_BONUS_MULTIPLIER = 2; // e.g., for 3rd correct answer in a row, + (3 * 2) bonus XP
+export const XP_DAILY_BONUS = 50;
+export const XP_BASE_FOR_LEVEL_UP = 100; // XP for level 1 to 2 = 100, for 2 to 3 = 200, etc. (level * base)
+export const MAX_QUIZ_LIVES = 3;
+
+export const LEVEL_UP_SOUND_MORSE = '.-.. ..-'; // "LU"
+export const BADGE_UNLOCK_SOUND_MORSE = '-... --.'; // "BG"
+export const CORRECT_ANSWER_SOUND_MORSE = '-.-.'; // "C" for Correct
+export const INCORRECT_ANSWER_SOUND_MORSE = '..';   // "I" for Incorrect
+
+const isCharMastered = (char: string, progressData: ProgressData): boolean => {
+    const prog = progressData[char];
+    if (!prog) return false;
+    const correctRate = prog.attempts > 0 ? prog.correct / prog.attempts : 0;
+    return prog.correct >= MASTERY_THRESHOLD_CORRECT && correctRate >= MASTERY_THRESHOLD_PERCENT;
+};
+
+const countMasteredInCategory = (category: 'letters' | 'numbers' | 'punctuation', progressData: ProgressData): number => {
+    return MORSE_CODE_MAP.filter(item => item.category === category)
+                         .reduce((count, item) => isCharMastered(item.char, progressData) ? count + 1 : count, 0);
+};
+
+export const BADGE_DEFINITIONS: BadgeDefinition[] = [
+  {
+    id: 'first_steps', name: 'First Steps', description: 'Correctly answered your first quiz question.',
+    icon: AwardIcon, // Assuming AwardIcon is a component
+    condition: (progressData, userStats) => Object.values(progressData).some(p => p.correct > 0),
+  },
+  {
+    id: 'letter_learner', name: 'Letter Learner', description: `Mastered ${Math.min(5, CHARACTER_SETS.find(cs => cs.id === 'letters')?.characters.length || 0)} letters.`,
+    icon: AwardIcon,
+    condition: (progressData) => countMasteredInCategory('letters', progressData) >= Math.min(5, CHARACTER_SETS.find(cs => cs.id === 'letters')?.characters.length || 0),
+  },
+  {
+    id: 'letter_master', name: 'Letter Master', description: 'Mastered all letters.',
+    icon: AwardIcon,
+    condition: (progressData) => countMasteredInCategory('letters', progressData) === (CHARACTER_SETS.find(cs => cs.id === 'letters')?.characters.length || -1),
+  },
+   {
+    id: 'number_novice', name: 'Number Novice', description: `Mastered ${Math.min(3, CHARACTER_SETS.find(cs => cs.id === 'numbers')?.characters.length || 0)} numbers.`,
+    icon: AwardIcon,
+    condition: (progressData) => countMasteredInCategory('numbers', progressData) >= Math.min(3, CHARACTER_SETS.find(cs => cs.id === 'numbers')?.characters.length || 0),
+  },
+  {
+    id: 'number_ace', name: 'Number Ace', description: 'Mastered all numbers.',
+    icon: AwardIcon,
+    condition: (progressData) => countMasteredInCategory('numbers', progressData) === (CHARACTER_SETS.find(cs => cs.id === 'numbers')?.characters.length || -1),
+  },
+   {
+    id: 'punctuation_pioneer', name: 'Punctuation Pioneer', description: `Mastered ${Math.min(3, CHARACTER_SETS.find(cs => cs.id === 'punctuation')?.characters.length || 0)} punctuation marks.`,
+    icon: AwardIcon,
+    condition: (progressData) => countMasteredInCategory('punctuation', progressData) >= Math.min(3, CHARACTER_SETS.find(cs => cs.id === 'punctuation')?.characters.length || 0),
+  },
+  {
+    id: 'morse_initiate', name: 'Morse Initiate', description: 'Reached Level 2.',
+    icon: StarIcon,
+    condition: (_, userStats) => userStats.level >= 2,
+  },
+  {
+    id: 'morse_adept', name: 'Morse Adept', description: 'Reached Level 5.',
+    icon: StarIcon,
+    condition: (_, userStats) => userStats.level >= 5,
+  },
+  {
+    id: 'morse_virtuoso', name: 'Morse Virtuoso', description: 'Reached Level 10.',
+    icon: StarIcon,
+    condition: (_, userStats) => userStats.level >= 10,
+  },
+  {
+    id: 'streak_starter_5', name: 'Streak Starter', description: 'Achieved a 5-correct-answer streak.',
+    icon: FlameIcon,
+    condition: (_, userStats) => userStats.longestQuizStreak >= 5,
+  },
+  {
+    id: 'streak_master_10', name: 'Streak Master', description: 'Achieved a 10-correct-answer streak.',
+    icon: FlameIcon,
+    condition: (_, userStats) => userStats.longestQuizStreak >= 10,
+  },
+  {
+    id: 'daily_dabbler', name: 'Daily Dabbler', description: 'Claimed the daily bonus for the first time.',
+    icon: AwardIcon,
+    condition: (_, userStats) => userStats.dailyBonusClaimsCount >= 1,
+  },
+  {
+    id: 'consistent_coder', name: 'Consistent Coder', description: 'Claimed the daily bonus 5 times.',
+    icon: AwardIcon,
+    condition: (_, userStats) => userStats.dailyBonusClaimsCount >= 5,
+  },
+  {
+    id: 'perfect_quiz_round', name: 'Perfect Round', description: `Completed a quiz session with no mistakes.`,
+    icon: AwardIcon,
+    condition: (progressData, userStats, quizSessionStats) => !!quizSessionStats && quizSessionStats.questionsAttempted === MAX_QUIZ_QUESTIONS && quizSessionStats.mistakesMade === 0,
+  },
+   {
+    id: 'quiz_warrior', name: 'Quiz Warrior', description: `Completed ${MAX_QUIZ_QUESTIONS} quiz sessions.`,
+    icon: AwardIcon,
+    condition: (progressData, userStats) => userStats.completedQuizSessions >= 10,
+  },
+];
+
+export const getXPForNextLevel = (level: number): number => {
+  return XP_BASE_FOR_LEVEL_UP * level;
+};
